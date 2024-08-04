@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, url_for
 import jenkins
 import os
 
@@ -14,15 +14,23 @@ def index():
 
 @app.route('/', methods=['POST'])
 def create():
+    url = request.form.get('url')
+    email = request.form.get('email')
     try:
         server = jenkins.Jenkins(host, username=username, password=password)
         print("Connected to Jenkins")
-        server.build_job('task-1/main')
+        server.build_job('task-1/job/main/')
+        # You can also pass parameters to Jenkins job if needed
+        # server.build_job('task-1/job/main/', {'param1': value1, 'param2': value2})
     except jenkins.JenkinsException as e:
         print(f"Jenkins error: {e}")
     except Exception as e:
         print(f"General error: {e}")
-    return redirect('/second.html')
+    return redirect(url_for('success'))
+
+@app.route('/success')
+def success():
+    return render_template('success.html')
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5001)
