@@ -14,14 +14,10 @@ def index():
 
 @app.route('/', methods=['POST'])
 def create():
-    url = request.form.get('url')
-    email = request.form.get('email')
     try:
         server = jenkins.Jenkins(host, username=username, password=password)
         print("Connected to Jenkins")
-        server.build_job('task-1/job/main/')
-        # You can also pass parameters to Jenkins job if needed
-        # server.build_job('task-1/job/main/', {'param1': value1, 'param2': value2})
+        server.build_job('task-1/main')
     except jenkins.JenkinsException as e:
         print(f"Jenkins error: {e}")
     except Exception as e:
@@ -31,6 +27,5 @@ def create():
 @app.route('/success')
 def success():
     return render_template('success.html')
-
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5001)
