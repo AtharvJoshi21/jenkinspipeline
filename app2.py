@@ -22,7 +22,7 @@ def create():
         print(f"Jenkins error: {e}")
     except Exception as e:
         print(f"General error: {e}")
-    return redirect('/')
+    return redirect('/second.html')
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5001)
