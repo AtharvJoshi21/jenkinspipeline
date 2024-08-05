@@ -14,10 +14,12 @@ def index():
 
 @app.route('/', methods=['POST'])
 def create():
+    url = request.form.get('url')
+    email = request.form.get('email')
     try:
         server = jenkins.Jenkins(host, username=username, password=password)
         print("Connected to Jenkins")
-        server.build_job('task-1/main')
+        server.build_job('task-1/main',{'PARAM_URL': url, 'PARAM_EMAIL': email})
     except jenkins.JenkinsException as e:
         print(f"Jenkins error: {e}")
     except Exception as e:
