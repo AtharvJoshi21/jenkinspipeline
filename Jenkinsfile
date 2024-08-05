@@ -1,6 +1,9 @@
 pipeline {
     agent any
-
+    parameters {
+        string(name: 'PARAM_URL', defaultValue: '', description: 'The URL to be used')
+        string(name: 'PARAM_EMAIL', defaultValue: '', description: 'The email address to be used')
+    }
     stages {
         stage('Build') {
             steps {
@@ -17,9 +20,10 @@ pipeline {
                 echo 'Deploying Job....'
             }
         }
-        stage('Relese'){
+        stage('Parameters'){
             steps {
-                echo 'Relesing Job....'
+                echo "URL: ${params.PARAM_URL}"
+                echo "Email: ${params.PARAM_EMAIL}"
             }
         }
     }
