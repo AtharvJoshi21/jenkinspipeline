@@ -17,7 +17,7 @@ def create():
     url = request.form.get('url')
     email = request.form.get('email')
     scan_type = request.form.get('scan_type')
-    generate_report = request.form.get('generate_report')
+    generate_report = request.form.get('generate_report', 'false')
     try:
         server = jenkins.Jenkins(host, username=username, password=password)
         print("Connected to Jenkins")
@@ -25,7 +25,7 @@ def create():
             'PARAM_URL': url, 
             'PARAM_EMAIL': email, 
             'PARAM_SCAN_TYPE':scan_type, 
-            'GENERATE_REPORT': generate_report or 'false'
+            'GENERATE_REPORT': generate_report
             })
     except jenkins.JenkinsException as e:
         print(f"Jenkins error: {e}")
