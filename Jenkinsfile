@@ -19,7 +19,7 @@ pipeline {
             steps {
                 sh '''
                 whoami
-                ls
+                pwd
                 // docker exec -u root -it jenkins
                 // docker --version
                 // docker run hello-world
