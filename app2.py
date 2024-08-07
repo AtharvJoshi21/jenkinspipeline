@@ -16,10 +16,12 @@ def index():
 def create():
     url = request.form.get('url')
     email = request.form.get('email')
+    scan_type = request.form.get('scan_type')
+    generate_report = request.form.get('generate_report')
     try:
         server = jenkins.Jenkins(host, username=username, password=password)
         print("Connected to Jenkins")
-        server.build_job('task-1/main',{'PARAM_URL': url, 'PARAM_EMAIL': email})
+        server.build_job('task-1/main',{'PARAM_URL': url, 'PARAM_EMAIL': email, 'PARAM_SCAN_TYPE':scan_type, 'GENERATE_REPORT':generate_report})
     except jenkins.JenkinsException as e:
         print(f"Jenkins error: {e}")
     except Exception as e:

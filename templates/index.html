@@ -70,6 +70,22 @@
         <input type="url" id="url" name="url" required>
       </div>
       <div class="form-group">
+        <label for="scan_type">Scan that you want to perform on given URL</label>
+        <select name="scan_type" id="scan_type">
+          <option value="baseline">Baseline</option>
+          <option value="api">APIS</option>
+          <option value="full">Full</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="generate_report">Do you wanna generate report?</label>
+        <select name="generate_report" id="generate_report">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
       </div>
