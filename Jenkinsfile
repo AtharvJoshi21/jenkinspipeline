@@ -2,7 +2,6 @@ pipeline {
     agent{
         dockerfile {
             filename 'Dockerfile'
-            reuseNode true
         }
     }
     parameters {
@@ -65,7 +64,7 @@ pipeline {
     }
     post{
         always{
-            script {
+            node {
                 cleanWs()
             }
         } 
