@@ -1,5 +1,7 @@
 pipeline {
-    agent{dockerfile true}
+    dockerfile {
+            filename 'Dockerfile'
+        }
     parameters {
         string(name: 'PARAM_URL', defaultValue: '', description: 'The URL to be used')
         string(name: 'PARAM_EMAIL', defaultValue: '', description: 'The email address to be used')
