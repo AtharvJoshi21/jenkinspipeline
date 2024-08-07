@@ -1,3 +1,5 @@
+def scan_type
+def target
 pipeline {
     agent any
     parameters {
