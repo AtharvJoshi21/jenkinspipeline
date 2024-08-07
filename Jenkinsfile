@@ -107,7 +107,28 @@ pipeline {
                     docker stop owasp
                     docker rm owasp
                 '''
-            cleanWs()
+        }
+        success {
+            // Send email with report
+            emailext (
+                to: "${params.PARAM_EMAIL}",
+                subject: "OWASP ZAP Scan Report",
+                body: """
+                    <p>The OWASP ZAP scan has been completed successfully.</p>
+                    <p>Please find the attached report for your review.</p>
+                """,
+                attachmentsPattern: "report.xml"
+            )
+        }
+        failure {
+            emailext (
+                to: "${params.PARAM_EMAIL}",
+                subject: "OWASP ZAP Scan Failed",
+                body: """
+                    <p>The OWASP ZAP scan has failed.</p>
+                    <p>Please check the Jenkins job for more details.</p>
+                """
+            )
         }
     }
 }
