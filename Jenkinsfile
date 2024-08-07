@@ -27,14 +27,11 @@ pipeline {
                 script {
 
                     // Start the scan
-                    sh "curl '${ZAP_URL}/JSON/ascan/action/scan/?url=${TARGET_URL}&recurse=true&inScopeOnly=true'"
+                    sh "curl -v '${ZAP_URL}/JSON/ascan/action/scan/?url=${TARGET_URL}&recurse=true&inScopeOnly=true'"
 
                     // Wait for the scan to complete (example, adjust as needed)
                     sleep(time: 90, unit: 'SECONDS')
 
-                    // Check the status
-                    def status = sh(script: "curl -s '${zapUrl}/JSON/ascan/view/status/?scanid=1'", returnStdout: true).trim()
-                    echo "Scan status: ${status}"
                     
                     // Generate the ZAP report
                     sh "curl '${ZAP_URL}/OTHER/core/other/htmlreport/?formMethod=GET' -o ${REPORT_PATH}"
