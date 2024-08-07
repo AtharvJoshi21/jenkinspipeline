@@ -15,6 +15,12 @@ pipeline {
                 echo 'Testing Job....'
             }
         }
+        stage('Test Docker') {
+            steps {
+                sh 'docker --version'
+                sh 'docker run hello-world'
+            }
+        }
         stage('ZAP Security Scan') {
             steps {
                 script {
@@ -51,6 +57,20 @@ pipeline {
     post{
         always{
             cleanWs()
-        } 
+        }
+        success {
+            script {
+                // Send the ZAP report via email
+                emailext(
+                    to: params.PARAM_EMAIL,
+                    subject: 'OWASP ZAP Security Report',
+                    body: 'Please find the attached OWASP ZAP security report.',
+                    attachmentsPattern: 'zap_report.html'
+                )
+            }
+        }
+        failure {
+            echo 'The job has failed. No report will be sent.'
+        }
     }
 }
