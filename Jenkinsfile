@@ -6,7 +6,7 @@ pipeline {
     }
     environment {
         TARGET_URL = "${params.PARAM_URL}"  
-        ZAP_URL = 'http://localhost:8081/zap/'
+        ZAP_URL = 'http://zap:8080'
         REPORT_PATH = '/zap/reports/zap_report.html' 
         RECIPIENT_EMAIL = "${params.PARAM_EMAIL}"  
     }
@@ -21,7 +21,7 @@ pipeline {
                 script {
 
                     // Start the scan
-                    sh "curl -v '${ZAP_URL}/JSON/ascan/action/scan/?url=${TARGET_URL}&recurse=true&inScopeOnly=true'"
+                    sh "curl '${ZAP_URL}/JSON/ascan/action/scan/?url=${TARGET_URL}&recurse=true&inScopeOnly=true'"
 
                     // Wait for the scan to complete (example, adjust as needed)
                     sleep(time: 90, unit: 'SECONDS')
