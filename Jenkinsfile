@@ -1,9 +1,5 @@
 pipeline {
-    agent{
-        dockerfile {
-            filename 'Dockerfile'
-        }
-    }
+    agent any
     parameters {
         string(name: 'PARAM_URL', defaultValue: '', description: 'The URL to be used')
         string(name: 'PARAM_EMAIL', defaultValue: '', description: 'The email address to be used')
@@ -19,39 +15,29 @@ pipeline {
                 echo 'Testing Job....'
             }
         }
-        stage('Security Scan') {
+        stage('ZAP Security Scan') {
             steps {
                 script {
-                    echo 'Running ZAP Security Scan...'
-                    sh '''
-                    # Ensure Docker is running
-                    docker info
-                    zap -version
-                    '''
+                    // Ensure the ZAP docker image is available
+                    def zapImage = 'owasp/zap2docker-stable:latest'
+                    def zapPort = '8080'
+                    def targetUrl = params.PARAM_URL
+                    def reportFile = 'zap_report.html'
+                    
+                    // Run ZAP Proxy using Docker
+                    sh """
+                        docker run -d -u zap -p ${zapPort}:8080 --name zap ${zapImage} zap.sh -daemon -host 0.0.0.0 -port ${zapPort}
+                        docker exec zap zap.sh -cmd -quickurl ${targetUrl} -out /zap/wrk/${reportFile}
+                    """
 
-                    // # Pull the ZAP Docker image
-                    // docker pull owasp/zap2docker-stable
+                    // Wait for the scan to complete
+                    sleep time: 5, unit: 'MINUTES'
 
-                    // # Run ZAP in daemon mode
-                    // docker run -u zap -d --name zap -p 8080:8080 \
-                    // owasp/zap2docker-stable zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true
+                    // Copy the report from the container to the workspace
+                    sh "docker cp zap:/zap/wrk/${reportFile} ."
 
-                    // # Wait for ZAP to start
-                    // sleep 30
-
-                    // # Run the ZAP quick scan
-                    // docker exec zap zap-cli quick-scan --self-contained --start-options '-config api.disablekey=true' ${params.PARAM_URL}
-
-                    // # Generate the ZAP report
-                    // docker exec zap zap-cli report -o /zap/wrk/zap_report.html -f html
-
-                    // # Copy the report from the container to the host
-                    // docker cp zap:/zap/wrk/zap_report.html .
-
-                    // # Stop and remove the ZAP container
-                    // docker stop zap
-                    // docker rm zap
-                    // '''
+                    // Stop and remove the ZAP container
+                    sh "docker stop zap && docker rm zap"
                 }
             }
         }
@@ -64,9 +50,7 @@ pipeline {
     }
     post{
         always{
-            node('master') {
-                cleanWs()
-            }
+            cleanWs()
         } 
     }
 }
