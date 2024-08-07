@@ -18,9 +18,11 @@ pipeline {
         stage('Test Docker') {
             steps {
                 sh '''
-                docker exec -u root -it jenkins /bin/bash
-                docker --version
-                ocker run hello-world
+                whoami
+                ls
+                // docker exec -u root -it jenkins
+                // docker --version
+                // docker run hello-world
                 '''
             }
         }
