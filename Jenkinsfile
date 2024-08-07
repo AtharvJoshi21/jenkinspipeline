@@ -7,6 +7,19 @@ pipeline {
         string(name: 'GENERATE_REPORT', defaultValue: '', description: 'Do you wanna generate report')
     }
     stages {
+        stage('Pipeline Info') {
+                 steps {
+                     script {
+                         echo "<--Parameter Initialization-->"
+                         echo """
+                         The current parameters are:
+                             Scan Type: ${params.PARAM_SCAN_TYPE}
+                             Target: ${params.PARAM_URL}
+                             Generate report: ${params.GENERATE_REPORT}
+                         """
+                     }
+                 }
+         }
         stage('Build') {
             steps {
                 echo 'Building Job....'
