@@ -20,9 +20,8 @@ pipeline {
                 sh '''
                 whoami
                 pwd
-                // docker exec -u root -it jenkins
-                // docker --version
-                // docker run hello-world
+                docker --version
+                docker run hello-world
                 '''
             }
         }
@@ -59,10 +58,10 @@ pipeline {
             }
         }
     }
-    post{
-        always{
-            cleanWs()
-        }
+    // post{
+    //     always{
+    //         cleanWs()
+    //     }
         // success {
         //     script {
         //         // Send the ZAP report via email
@@ -77,5 +76,5 @@ pipeline {
         // failure {
         //     echo 'The job has failed. No report will be sent.'
         // }
-    }
+    // }
 }
