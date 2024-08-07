@@ -17,8 +17,11 @@ pipeline {
         }
         stage('Test Docker') {
             steps {
-                sh 'docker --version'
-                sh 'sudo docker run hello-world'
+                sh '''
+                docker exec -u root -it jenkins /bin/bash
+                docker --version
+                ocker run hello-world
+                '''
             }
         }
         // stage('ZAP Security Scan') {
