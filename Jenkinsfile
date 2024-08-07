@@ -99,5 +99,5 @@ pipeline {
         // failure {
         //     echo 'The job has failed. No report will be sent.'
         // }
-    // }
+    }
 }
