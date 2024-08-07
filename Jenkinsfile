@@ -19,8 +19,6 @@ pipeline {
             steps {
                 script {
                     echo 'Running ZAP Security Scan...'
-
-                    Pull and run ZAP Docker container
                     sh '''
                     # Ensure Docker is running
                     docker info
@@ -52,24 +50,7 @@ pipeline {
                     // '''
                 }
             }
-            // post {
-            //     always {
-            //         archiveArtifacts artifacts: 'zap_report.html', allowEmptyArchive: true
-            //     }
-            // }
         }
-        // stage('Send Report') {
-        //     steps {
-        //         script {
-        //             emailext(
-        //                 to: params.PARAM_EMAIL,
-        //                 subject: 'ZAP Security Scan Report',
-        //                 body: 'Please find the attached ZAP security scan report.',
-        //                 attachmentsPattern: 'zap_report.html'
-        //             )
-        //         }
-        //     }
-        // }
         stage('Parameters'){
             steps {
                 echo "URL: ${params.PARAM_URL}"
@@ -77,9 +58,9 @@ pipeline {
             }
         }
     }
-    post{
-        always{
-            cleanWs()
-        } 
-    }
+    // post{
+    //     always{
+    //         cleanWs()
+    //     } 
+    // }
 }
