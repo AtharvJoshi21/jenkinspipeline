@@ -7,19 +7,13 @@ pipeline {
     environment {
         TARGET_URL = "${params.PARAM_URL}"  
         ZAP_URL = 'http://localhost:8081/zap/'
-        REPORT_PATH = 'zap_report.html'
+        REPORT_PATH = '/zap/reports/zap_report.html' 
         RECIPIENT_EMAIL = "${params.PARAM_EMAIL}"  
     }
     stages {
         stage('Build') {
             steps {
                 echo 'Building Job....'
-            }
-        }
-        stage('Parameters'){
-            steps {
-                echo "URL: ${params.PARAM_URL}"
-                echo "Email: ${params.PARAM_EMAIL}"
             }
         }
         stage('Run ZAP Scan') {
@@ -72,7 +66,7 @@ pipeline {
                 to: "${RECIPIENT_EMAIL}",
                 subject: "ZAP Security Report for ${TARGET_URL}",
                 body: "Please find the attached ZAP security report for ${TARGET_URL}.",
-                attachmentsPattern: "${REPORT_PATH}",
+                attachmentsPattern: "/var/jenkins_home/zap-reports/zap_report.html",  // Path in Jenkins container
                 mimeType: 'text/html'
             )
             cleanWs()
