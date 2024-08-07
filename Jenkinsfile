@@ -19,16 +19,35 @@ pipeline {
             steps {
                 script {
                     echo 'Running ZAP Security Scan...'
+
                     // Pull and run ZAP Docker container
-                    sh """
-                    docker run -u zap -d --name zap -p 8080:8080 owasp/zap2docker-stable zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true
-                    sleep 30  # Give ZAP some time to start
+                    sh '''
+                    # Ensure Docker is running
+                    docker info
+
+                    # Pull the ZAP Docker image
+                    docker pull owasp/zap2docker-stable
+
+                    # Run ZAP in daemon mode
+                    docker run -u zap -d --name zap -p 8080:8080 \
+                    owasp/zap2docker-stable zap.sh -daemon -port 8080 -host 0.0.0.0 -config api.disablekey=true
+
+                    # Wait for ZAP to start
+                    sleep 30
+
+                    # Run the ZAP quick scan
                     docker exec zap zap-cli quick-scan --self-contained --start-options '-config api.disablekey=true' ${params.PARAM_URL}
+
+                    # Generate the ZAP report
                     docker exec zap zap-cli report -o /zap/wrk/zap_report.html -f html
+
+                    # Copy the report from the container to the host
                     docker cp zap:/zap/wrk/zap_report.html .
+
+                    # Stop and remove the ZAP container
                     docker stop zap
                     docker rm zap
-                    """
+                    '''
                 }
             }
             post {
