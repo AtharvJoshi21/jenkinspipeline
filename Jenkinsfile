@@ -5,10 +5,10 @@ pipeline {
         string(name: 'PARAM_EMAIL', defaultValue: '', description: 'The email address to be used')
     }
     environment {
-        TARGET_URL = ${params.PARAM_URL}  
+        TARGET_URL = "${params.PARAM_URL}"  
         ZAP_URL = 'http://localhost:8081/zap/'
         REPORT_PATH = 'zap_report.html'
-        RECIPIENT_EMAIL = ${params.PARAM_EMAIL}  
+        RECIPIENT_EMAIL = "${params.PARAM_EMAIL}"  
     }
     stages {
         stage('Build') {
@@ -16,9 +16,10 @@ pipeline {
                 echo 'Building Job....'
             }
         }
-        stage('Test'){
+        stage('Parameters'){
             steps {
-                echo 'Testing Job....'
+                echo "URL: ${params.PARAM_URL}"
+                echo "Email: ${params.PARAM_EMAIL}"
             }
         }
         stage('Run ZAP Scan') {
@@ -65,12 +66,6 @@ pipeline {
         //             // Stop and remove the ZAP container
         //             sh "docker stop zap && docker rm zap"
         //         }
-        //     }
-        // }
-        // stage('Parameters'){
-        //     steps {
-        //         echo "URL: ${params.PARAM_URL}"
-        //         echo "Email: ${params.PARAM_EMAIL}"
         //     }
         // }
     }
