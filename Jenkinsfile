@@ -61,7 +61,7 @@ pipeline {
                             docker exec owasp \
                             zap-baseline.py \
                             -t $target \
-                            -x report.xml \
+                            -x report.json \
                             -I
                         """
                     }
@@ -70,7 +70,7 @@ pipeline {
                             docker exec owasp \
                             zap-api-scan.py \
                             -t $target \
-                            -x report.xml \
+                            -x report.json \
                             -I
                         """
                     }
@@ -79,10 +79,10 @@ pipeline {
                             docker exec owasp \
                             zap-full-scan.py \
                             -t $target \
-                            //-x report.xml
+                            //-x report.json
                             -I
                         """
-                         //-x report-$(date +%d-%b-%Y).xml
+                         //-x report-$(date +%d-%b-%Y).json
                     }
                     else{
                         echo "Something went wrong..."
@@ -94,7 +94,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker cp owasp:/zap/wrk/report.xml ${WORKSPACE}/report.xml
+                        docker cp owasp:/zap/wrk/report.json ${WORKSPACE}/report.json
                     '''
                 }
             }
@@ -117,8 +117,9 @@ pipeline {
                     The OWASP ZAP scan has been completed successfully.
                     lease find the attached report for your review.
                 """,
-                attachmentsPattern: "report.xml"
+                attachmentsPattern: "report.json"
             )
+            cleanWs()
         }
         failure {
             emailext (
@@ -129,6 +130,7 @@ pipeline {
                     Please check the Jenkins job for more details.
                 """
             )
+            cleanWs()
         }
     }
 }
