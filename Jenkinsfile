@@ -114,8 +114,8 @@ pipeline {
                 to: "${params.PARAM_EMAIL}",
                 subject: "OWASP ZAP Scan Report",
                 body: """
-                    <p>The OWASP ZAP scan has been completed successfully.</p>
-                    <p>Please find the attached report for your review.</p>
+                    The OWASP ZAP scan has been completed successfully.
+                    lease find the attached report for your review.
                 """,
                 attachmentsPattern: "report.xml"
             )
@@ -125,8 +125,8 @@ pipeline {
                 to: "${params.PARAM_EMAIL}",
                 subject: "OWASP ZAP Scan Failed",
                 body: """
-                    <p>The OWASP ZAP scan has failed.</p>
-                    <p>Please check the Jenkins job for more details.</p>
+                    The OWASP ZAP scan has failed.
+                    Please check the Jenkins job for more details.
                 """
             )
         }
