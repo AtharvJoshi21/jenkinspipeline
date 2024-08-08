@@ -99,6 +99,15 @@ pipeline {
                 }
             }
         }
+        stage('Convert XML to JSON') {
+            steps {
+                sh '''
+                apt-get update && apt-get install -y xml2 jq
+                xml2 < ${WORKSPACE}/report.xml | jq --slurp --raw-input --raw-output 'split("\\n") | .[] | select(length > 0) | split("=") | {(.[])}' > ${WORKSPACE}/report.json
+                '''
+                archiveArtifacts artifacts: 'report.json'
+            }
+        }
     }
     post{
         always{
@@ -117,7 +126,7 @@ pipeline {
                     The OWASP ZAP scan has been completed successfully.
                     lease find the attached report for your review.
                 """,
-                attachmentsPattern: "report.xml"
+                attachmentsPattern: "report.json"
             )
         }
         failure {
