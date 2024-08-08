@@ -125,8 +125,9 @@ pipeline {
                     The OWASP ZAP scan has been completed successfully.
                     lease find the attached report for your review.
                 """,
-                attachmentsPattern: "report.json"
+                attachmentsPattern: "report.xml"
             )
+            cleanWs()
         }
         failure {
             emailext (
@@ -137,6 +138,7 @@ pipeline {
                     Please check the Jenkins job for more details.
                 """
             )
+            cleanWs()
         }
     }
 }
