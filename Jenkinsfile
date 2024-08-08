@@ -99,14 +99,14 @@ pipeline {
                 }
             }
         }
-        stage('Convert XML to JSON') {
-            steps {
-                sh  ''' 
-                xml2 < ${WORKSPACE}/report.xml | sed 's/\\([a-zA-Z0-9_\\-]*\\)=/\\1:/' | jq -R 'split("\\n") | map(select(length > 0) | split(":") | {(.[0]): .[1]}) | add' > ${WORKSPACE}/report.json 
-                '''
-                archiveArtifacts artifacts: 'report.json'
-            }
-        }
+        // stage('Convert XML to JSON') {
+        //     steps {
+        //         sh  ''' 
+        //         xml2 < ${WORKSPACE}/report.xml | sed 's/\\([a-zA-Z0-9_\\-]*\\)=/\\1:/' | jq -R 'split("\\n") | map(select(length > 0) | split(":") | {(.[0]): .[1]}) | add' > ${WORKSPACE}/report.json 
+        //         '''
+        //         archiveArtifacts artifacts: 'report.json'
+        //     }
+        // }
     }
     post{
         always{
