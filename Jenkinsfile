@@ -22,83 +22,83 @@ pipeline {
                 }
             }
         }
-        // stage('Setting up OWASP ZAP docker container') {
-        //     steps {
-        //         script {
-        //             echo "Pulling up last OWASP ZAP container --> Start"
-        //             sh 'docker pull zaproxy/zap-stable'
-        //             echo "Pulling up last VMS container --> End"
-        //             echo "Starting container --> Start"
-        //             sh """
-        //             docker run -dt --name owasp \
-        //             zaproxy/zap-stable \
-        //             /bin/bash
-        //             """
-        //         }
-        //     }
-        // }
-        // stage('Prepare wrk directory') {
-        //     when {
-        //         environment name : 'GENERATE_REPORT', value: 'true'
-        //     }
-        //     steps {
-        //         script {
-        //             sh """
-        //                 docker exec owasp \
-        //                 mkdir /zap/wrk
-        //             """
-        //         }
-        //     }
-        // }
-        // stage('Scanning target on owasp container') {
-        //     steps {
-        //         script {
-        //             scan_type = "${params.PARAM_SCAN_TYPE}"
-        //             echo "----> scan_type: $scan_type"
-        //             target = "${params.PARAM_URL}"
-        //             if(scan_type == "Baseline"){
-        //                 sh """
-        //                     docker exec owasp \
-        //                     zap-baseline.py \
-        //                     -t $target \
-        //                     -x report.xml \
-        //                     -I
-        //                 """
-        //             }
-        //             else if(scan_type == "APIS"){
-        //                 sh """
-        //                     docker exec owasp \
-        //                     zap-api-scan.py \
-        //                     -t $target \
-        //                     -x report.xml \
-        //                     -I
-        //                 """
-        //             }
-        //             else if(scan_type == "Full"){
-        //                 sh """
-        //                     docker exec owasp \
-        //                     zap-full-scan.py \
-        //                     -t $target \
-        //                     //-x report.xml
-        //                     -I
-        //                 """
-        //                  //-x report-$(date +%d-%b-%Y).xml
-        //             }
-        //             else{
-        //                 echo "Something went wrong..."
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('Copy Report to Workspace'){
-        //     steps {
-        //         script {
-        //             sh '''
-        //                 docker cp owasp:/zap/wrk/report.xml ${WORKSPACE}/report.xml
-        //             '''
-        //         }
-        //     }
-        // }
+        stage('Setting up OWASP ZAP docker container') {
+            steps {
+                script {
+                    echo "Pulling up last OWASP ZAP container --> Start"
+                    sh 'docker pull zaproxy/zap-stable'
+                    echo "Pulling up last VMS container --> End"
+                    echo "Starting container --> Start"
+                    sh """
+                    docker run -dt --name owasp \
+                    zaproxy/zap-stable \
+                    /bin/bash
+                    """
+                }
+            }
+        }
+        stage('Prepare wrk directory') {
+            when {
+                environment name : 'GENERATE_REPORT', value: 'true'
+            }
+            steps {
+                script {
+                    sh """
+                        docker exec owasp \
+                        mkdir /zap/wrk
+                    """
+                }
+            }
+        }
+        stage('Scanning target on owasp container') {
+            steps {
+                script {
+                    scan_type = "${params.PARAM_SCAN_TYPE}"
+                    echo "----> scan_type: $scan_type"
+                    target = "${params.PARAM_URL}"
+                    if(scan_type == "Baseline"){
+                        sh """
+                            docker exec owasp \
+                            zap-baseline.py \
+                            -t $target \
+                            -x report.xml \
+                            -I
+                        """
+                    }
+                    else if(scan_type == "APIS"){
+                        sh """
+                            docker exec owasp \
+                            zap-api-scan.py \
+                            -t $target \
+                            -x report.xml \
+                            -I
+                        """
+                    }
+                    else if(scan_type == "Full"){
+                        sh """
+                            docker exec owasp \
+                            zap-full-scan.py \
+                            -t $target \
+                            //-x report.xml
+                            -I
+                        """
+                         //-x report-$(date +%d-%b-%Y).xml
+                    }
+                    else{
+                        echo "Something went wrong..."
+                    }
+                }
+            }
+        }
+        stage('Copy Report to Workspace'){
+            steps {
+                script {
+                    sh '''
+                        docker cp owasp:/zap/wrk/report.xml ${WORKSPACE}/report.xml
+                    '''
+                }
+            }
+        }
         stage('Convert XML to JSON') {
             steps {
                 sh  ''' 
