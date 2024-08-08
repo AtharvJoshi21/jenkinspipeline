@@ -102,7 +102,7 @@ pipeline {
         stage('Convert XML to JSON') {
             steps {
                 sh '''
-                xml2 < ${WORKSPACE}/report.xml | jq --slurp --raw-input --raw-output 'split("\\n") | .[] | select(length > 0) | split("=") | {(.[])}' > ${WORKSPACE}/report.json
+                xml2 < ${WORKSPACE}/report.xml | sed 's/\([a-zA-Z0-9_\-]*\)=/\1:/' | jq -R 'split("\n") | map(select(length > 0) | split(":") | {(.[0]): .[1]}) | add' > ${WORKSPACE}/report.json
                 '''
                 archiveArtifacts artifacts: 'report.json'
             }
