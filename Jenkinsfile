@@ -26,11 +26,11 @@ pipeline {
             steps {
                 script {
                     echo "Pulling up last OWASP ZAP container --> Start"
-                    sh 'docker pull zaproxy/zap-stable'
+                    sh 'sudo docker pull zaproxy/zap-stable'
                     echo "Pulling up last VMS container --> End"
                     echo "Starting container --> Start"
                     sh """
-                    docker run -dt --name owasp \
+                    sudo docker run -dt --name owasp \
                     zaproxy/zap-stable \
                     /bin/bash
                     """
@@ -44,7 +44,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker exec owasp \
+                        sudo docker exec owasp \
                         mkdir /zap/wrk
                     """
                 }
@@ -58,7 +58,7 @@ pipeline {
                     target = "${params.PARAM_URL}"
                     if(scan_type == "Baseline"){
                         sh """
-                            docker exec owasp \
+                            sudo docker exec owasp \
                             zap-baseline.py \
                             -t $target \
                             -x report.xml \
@@ -67,7 +67,7 @@ pipeline {
                     }
                     else if(scan_type == "APIS"){
                         sh """
-                            docker exec owasp \
+                            sudo docker exec owasp \
                             zap-api-scan.py \
                             -t $target \
                             -x report.xml \
@@ -76,7 +76,7 @@ pipeline {
                     }
                     else if(scan_type == "Full"){
                         sh """
-                            docker exec owasp \
+                            sudo docker exec owasp \
                             zap-full-scan.py \
                             -t $target \
                             //-x report.xml
@@ -94,7 +94,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker cp owasp:/zap/wrk/report.xml ${WORKSPACE}/report.xml
+                        sudo docker cp owasp:/zap/wrk/report.xml ${WORKSPACE}/report.xml
                     '''
                 }
             }
@@ -112,8 +112,8 @@ pipeline {
         always{
             echo "Removing container"
                 sh '''
-                    docker stop owasp
-                    docker rm owasp
+                    sudo docker stop owasp
+                    sudo docker rm owasp
                 '''
         }
         success {
