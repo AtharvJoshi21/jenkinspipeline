@@ -58,21 +58,21 @@ pipeline {
                         sh """
                             sudo docker exec owasp zap-baseline.py \
                             -t $targetUrl \
-                            -x /zap/wrk/report.xml \
+                            -x report.xml \
                             -I
                         """
                     } else if (scanType == "API") {
                         sh """
                             sudo docker exec owasp zap-api-scan.py \
                             -t $targetUrl \
-                            -x /zap/wrk/report.xml \
+                            -x report.xml \
                             -I
                         """
                     } else if (scanType == "Full") {
                         sh """
                             sudo docker exec owasp zap-full-scan.py \
                             -t $targetUrl \
-                            -x /zap/wrk/report.xml \
+                            -x report.xml \
                             -I
                         """
                     } else {
