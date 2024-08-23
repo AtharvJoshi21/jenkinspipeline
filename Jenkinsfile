@@ -1,144 +1,129 @@
-def scan_type
-def target
+def scanType
+def targetUrl
+
 pipeline {
     agent any
     parameters {
-        string(name: 'PARAM_URL', defaultValue: '', description: 'The URL to be used')
-        string(name: 'PARAM_EMAIL', defaultValue: '', description: 'The email address to be used')
-        string(name: 'PARAM_SCAN_TYPE', defaultValue: '', description: 'Scan that you want to perform on given URL')
-        string(name: 'GENERATE_REPORT', defaultValue: '', description: 'Do you wanna generate report')
+        string(name: 'PARAM_URL', defaultValue: '', description: 'Target URL for the scan')
+        string(name: 'PARAM_EMAIL', defaultValue: '', description: 'Recipient email address for the report')
+        string(name: 'PARAM_SCAN_TYPE', defaultValue: '', description: 'Type of scan to perform: Baseline, API, or Full')
+        string(name: 'GENERATE_REPORT', defaultValue: 'false', description: 'Set to true if you want to generate a report')
     }
+    
     stages {
-        stage('Pipeline Info') {
+        stage('Initialization') {
             steps {
                 script {
-                    echo "<--Parameter Initialization-->"
+                    echo "Initializing Pipeline with parameters..."
                     echo """
-                        The current parameters are:
                         Scan Type: ${params.PARAM_SCAN_TYPE}
-                        Target: ${params.PARAM_URL}
-                        Generate report: ${params.GENERATE_REPORT}
-                     """
+                        Target URL: ${params.PARAM_URL}
+                        Report Generation: ${params.GENERATE_REPORT}
+                    """
                 }
             }
         }
-        stage('Setting up OWASP ZAP docker container') {
+
+        stage('Start OWASP ZAP Container') {
             steps {
                 script {
-                    echo "Pulling up last OWASP ZAP container --> Start"
+                    echo "Pulling the latest OWASP ZAP Docker image..."
                     sh 'sudo docker pull zaproxy/zap-stable'
-                    echo "Pulling up last VMS container --> End"
-                    echo "Starting container --> Start"
-                    sh """
-                    sudo docker run -dt --name owasp \
-                    zaproxy/zap-stable \
-                    /bin/bash
-                    """
+                    echo "Starting OWASP ZAP container..."
+                    sh 'sudo docker run -d --name owasp zaproxy/zap-stable /bin/bash'
                 }
             }
         }
-        stage('Prepare wrk directory') {
+
+        stage('Prepare Report Directory') {
             when {
-                environment name : 'GENERATE_REPORT', value: 'true'
+                expression { params.GENERATE_REPORT == 'true' }
             }
             steps {
                 script {
-                    sh """
-                        sudo docker exec owasp \
-                        mkdir /zap/wrk
-                    """
+                    echo "Creating report directory in the container..."
+                    sh 'sudo docker exec owasp mkdir -p /zap/wrk'
                 }
             }
         }
-        stage('Scanning target on owasp container') {
+
+        stage('Perform Security Scan') {
             steps {
                 script {
-                    scan_type = "${params.PARAM_SCAN_TYPE}"
-                    echo "----> scan_type: $scan_type"
-                    target = "${params.PARAM_URL}"
-                    if(scan_type == "Baseline"){
+                    scanType = "${params.PARAM_SCAN_TYPE}"
+                    targetUrl = "${params.PARAM_URL}"
+                    echo "Executing ${scanType} scan on target: ${targetUrl}"
+
+                    if (scanType == "Baseline") {
                         sh """
-                            sudo docker exec owasp \
-                            zap-baseline.py \
-                            -t $target \
-                            -x report.xml \
+                            sudo docker exec owasp zap-baseline.py \
+                            -t $targetUrl \
+                            -x /zap/wrk/report.xml \
                             -I
                         """
-                    }
-                    else if(scan_type == "APIS"){
+                    } else if (scanType == "API") {
                         sh """
-                            sudo docker exec owasp \
-                            zap-api-scan.py \
-                            -t $target \
-                            -x report.xml \
+                            sudo docker exec owasp zap-api-scan.py \
+                            -t $targetUrl \
+                            -x /zap/wrk/report.xml \
                             -I
                         """
-                    }
-                    else if(scan_type == "Full"){
+                    } else if (scanType == "Full") {
                         sh """
-                            sudo docker exec owasp \
-                            zap-full-scan.py \
-                            -t $target \
-                            //-x report.xml
+                            sudo docker exec owasp zap-full-scan.py \
+                            -t $targetUrl \
+                            -x /zap/wrk/report.xml \
                             -I
                         """
-                         //-x report-$(date +%d-%b-%Y).xml
-                    }
-                    else{
-                        echo "Something went wrong..."
+                    } else {
+                        error "Invalid scan type specified: $scanType"
                     }
                 }
             }
         }
-        stage('Copy Report to Workspace'){
+
+        stage('Save Report to Workspace') {
+            when {
+                expression { params.GENERATE_REPORT == 'true' }
+            }
             steps {
                 script {
-                    sh '''
-                        sudo docker cp owasp:/zap/wrk/report.xml ${WORKSPACE}/report.xml
-                    '''
+                    echo "Copying report from OWASP ZAP container to Jenkins workspace..."
+                    sh 'sudo docker cp owasp:/zap/wrk/report.xml ${WORKSPACE}/report.xml'
                 }
             }
         }
-        // stage('Convert XML to JSON') {
-        //     steps {
-        //         sh  ''' 
-        //         xml2 < ${WORKSPACE}/report.xml | sed 's/\\([a-zA-Z0-9_\\-]*\\)=/\\1:/' | jq -R 'split("\\n") | map(select(length > 0) | split(":") | {(.[0]): .[1]}) | add' > ${WORKSPACE}/report.json 
-        //         '''
-        //         archiveArtifacts artifacts: 'report.json'
-        //     }
-        // }
     }
-    post{
-        always{
-            echo "Removing container"
-                sh '''
-                    sudo docker stop owasp
-                    sudo docker rm owasp
-                '''
+
+    post {
+        always {
+            script {
+                echo "Cleaning up: stopping and removing the OWASP ZAP container..."
+                sh 'sudo docker stop owasp && sudo docker rm owasp'
+            }
         }
+
         success {
-            // Send email with report
-            emailext (
-                to: "${params.PARAM_EMAIL}",
-                subject: "OWASP ZAP Scan Report",
-                body: """
-                    The OWASP ZAP scan has been completed successfully.
-                    lease find the attached report for your review.
-                """,
-                attachmentsPattern: "report.xml"
-            )
-            cleanWs()
+            script {
+                echo "Sending report to ${params.PARAM_EMAIL} via email..."
+                emailext(
+                    to: "${params.PARAM_EMAIL}",
+                    subject: "OWASP ZAP Scan Completed",
+                    body: "The OWASP ZAP scan has been successfully completed. Please find the attached report.",
+                    attachmentsPattern: 'report.xml'
+                )
+            }
         }
+
         failure {
-            emailext (
-                to: "${params.PARAM_EMAIL}",
-                subject: "OWASP ZAP Scan Failed",
-                body: """
-                    The OWASP ZAP scan has failed.
-                    Please check the Jenkins job for more details.
-                """
-            )
-            cleanWs()
+            script {
+                echo "Notifying user of failure via email..."
+                emailext(
+                    to: "${params.PARAM_EMAIL}",
+                    subject: "OWASP ZAP Scan Failed",
+                    body: "The OWASP ZAP scan encountered an error. Please check the Jenkins logs for further details."
+                )
+            }
         }
     }
 }
