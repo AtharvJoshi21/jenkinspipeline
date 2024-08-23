@@ -1,2 +1,2 @@
 # jenkinspipeline
-created for Jenkins demo
+created for MSc major project
