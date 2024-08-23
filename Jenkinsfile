@@ -30,7 +30,7 @@ pipeline {
                     echo "Pulling the latest OWASP ZAP Docker image..."
                     sh 'sudo docker pull zaproxy/zap-stable'
                     echo "Starting OWASP ZAP container..."
-                    sh 'sudo docker run -d --name owasp zaproxy/zap-stable /bin/bash'
+                    sh 'sudo docker run -dt --name owasp zaproxy/zap-stable /bin/bash'
                 }
             }
         }
